@@ -1,0 +1,28 @@
+name: Run Monday Backup
+
+on:
+  workflow_dispatch:  # manual triggering
+
+jobs:
+  maven-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build with Maven
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: mvn -B package
+      - name: Set Google Credentials
+        run: echo "GOOGLE_CREDENTIALS=${{ secrets.GOOGLE_CREDENTIALS }}" >> $GITHUB_ENV
+      - name: Set Monday API Key
+        run: echo "MONDAY_API_TOKEN=${{ secrets.MONDAY_API_TOKEN }}" >> $GITHUB_ENV
+      - name: Run export
+        run: java -jar monday-drive-backup-*.jar

@@ -1,7 +1,5 @@
 package com.jwattsuk.mondaydrivebackup;
 
-// CsvConverter.java
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,10 +16,12 @@ public class CsvConverter {
             .getJSONArray("boards")
             .getJSONObject(0);
 
-        List<String> headers = extractHeaders(board);
-        List<List<String>> rows = extractRows(board);
+        return "/test.csv";
+
+        // List<String> headers = extractHeaders(board);
+        // List<List<String>> rows = extractRows(board);
         
-        return writeToCsvFile(headers, rows);
+        // return writeToCsvFile(headers, rows);
     }
 
     List<String> extractHeaders(JSONObject board) {

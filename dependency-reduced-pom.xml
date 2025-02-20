@@ -26,7 +26,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.jwattsuk.MondayToDriveExporter</mainClass>
+                  <mainClass>com.jwattsuk.mondaydrivebackup.Main</mainClass>
                 </transformer>
               </transformers>
               <filters>
@@ -46,6 +46,17 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.1.2</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.jwattsuk.mondaydrivebackup.Main</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
       </plugin>
     </plugins>
   </build>

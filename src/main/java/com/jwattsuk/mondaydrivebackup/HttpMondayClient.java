@@ -24,21 +24,25 @@ public class HttpMondayClient implements MondayClient {
     @Override
     public JSONObject fetchBoardData(String boardId) throws IOException, InterruptedException {
         String query = """
-            query {
-                boards(ids: %s) {
-                    items {
-                        name
-                        column_values {
-                            title
-                            text
-                            value
-                        }
-                    }
-                    columns {
+            {
+            boards(ids: %s) {
+                name
+                id
+                description
+                items_page  {
+                items {
+                    name
+                    column_values {
+                    column {
                         title
-                        type
+                    }
+                    id
+                    value
+                    text
                     }
                 }
+                }
+            }
             }
         """.formatted(boardId);
 
