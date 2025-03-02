@@ -10,25 +10,25 @@ public class MondayToDriveExporter {
     private final MondayClient mondayClient;
     private final CsvConverter csvConverter;
     private final GoogleDriveCsvUploader driveUploader;
-    private final String boardId;
+    private final AppConfig.Board board;
 
     public MondayToDriveExporter(
             MondayClient mondayClient,
             CsvConverter csvConverter,
             GoogleDriveCsvUploader driveUploader,
-            String boardId) {
+            AppConfig.Board board) {
         this.mondayClient = mondayClient;
         this.csvConverter = csvConverter;
         this.driveUploader = driveUploader;
-        this.boardId = boardId;
+        this.board = board;
     }
 
     public String exportBoardToGoogleDrive() throws Exception {
-        JSONObject boardData = mondayClient.fetchBoardData(boardId);
+        JSONObject boardData = mondayClient.fetchBoardData(String.valueOf(board.getId()));
         String csvFilePath = csvConverter.convertToCsv(boardData);
         
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        String fileName = "monday_board_" + boardId + "_" + timestamp + ".csv";
+        String fileName = "monday_board_" + board.getName() + "_" + timestamp + ".csv";
         
         try {
             return driveUploader.uploadCsvFile(csvFilePath, fileName);

@@ -1,0 +1,20 @@
+{
+boards(ids: 1734380575), {
+    name
+    id
+    description
+    items_page  {
+    items {
+        name
+        column_values {
+        column {
+            title
+        }
+        id
+        value
+        text
+        }
+    }
+    }
+}
+}

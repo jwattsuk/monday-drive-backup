@@ -1,21 +1,22 @@
 package com.jwattsuk.mondaydrivebackup;
 
 import java.net.http.HttpClient;
+import java.util.List;
 
 public class Main {
 
-    private static final String MONDAY_BOARD_ID = "monday.board_id";
-    private static final String DRIVE_FOLDER_ID = "google.drive_folder_id";
+    private static final String MONDAY_BOARDS = "monday.boards";
+    private static final String DRIVE_FOLDER_ID = "google.drive.folderId";
     private static final String MONDAY_API_TOKEN = "MONDAY_API_TOKEN";
     private static final String GOOGLE_CREDENTIALS = "GOOGLE_CREDENTIALS";
 
     public static void main(String[] args) {
         try {
-            AppConfig config = new AppConfig();
-            String boardId = config.getProperty(MONDAY_BOARD_ID);
-            String driveFolderId = config.getProperty(DRIVE_FOLDER_ID);
-            if (boardId == null || driveFolderId == null) {
-                System.err.printf("Error: %s and %s configuration properties must be set%n", MONDAY_BOARD_ID, DRIVE_FOLDER_ID);
+            AppConfig appConfig = new AppConfig();
+            List<AppConfig.Board> boards = appConfig.getMondayBoards();
+            String driveFolderId = appConfig.getProperty(DRIVE_FOLDER_ID);
+            if (boards == null || boards.isEmpty() || driveFolderId == null) {
+                System.err.printf("Error: %s and %s configuration properties must be set%n", MONDAY_BOARDS, DRIVE_FOLDER_ID);
                 System.exit(1);
             }
 
@@ -30,20 +31,28 @@ public class Main {
             HttpClient httpClient = HttpClient.newHttpClient();
             MondayClient mondayClient = new HttpMondayClient(mondayApiToken, httpClient);
             CsvConverter csvConverter = new CsvConverter();
-            GoogleDriveCsvUploader driveUploader = new GoogleDriveCsvUploader(googleCredentials, driveFolderId);
+            CredentialsBuilder credentialsBuilder = new CredentialsBuilder();
+            GoogleDriveCsvUploader driveUploader =
+                    new GoogleDriveCsvUploader(credentialsBuilder.set(googleCredentials).build(), driveFolderId);
 
-            // Create the exporter
-            MondayToDriveExporter exporter = new MondayToDriveExporter(
-                mondayClient,
-                csvConverter,
-                driveUploader,
-                boardId
-            );
+            // Loop through the boards and export each one
+            for (AppConfig.Board board : boards) {
+                System.out.println("Exporting Board ID: " + board.getId() + ", Name: " + board.getName());
+                // Create the exporter
+                MondayToDriveExporter exporter = new MondayToDriveExporter(
+                        mondayClient,
+                        csvConverter,
+                        driveUploader,
+                        board
+                );
 
-            // Run the export
-            String fileId = exporter.exportBoardToGoogleDrive();
-            System.out.println("Export completed successfully!");
-            System.out.println("Google Drive File ID: " + fileId);
+                // Run the export
+                String fileId = exporter.exportBoardToGoogleDrive();
+                System.out.println("Export completed successfully!");
+                System.out.println("Google Drive File ID: " + fileId);
+            }
+
+
             
         } catch (Exception e) {
             System.err.println("Export failed: " + e.getMessage());

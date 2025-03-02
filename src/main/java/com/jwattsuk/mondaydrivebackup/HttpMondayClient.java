@@ -1,10 +1,14 @@
 package com.jwattsuk.mondaydrivebackup;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
 import org.json.JSONObject;
 
@@ -23,28 +27,7 @@ public class HttpMondayClient implements MondayClient {
 
     @Override
     public JSONObject fetchBoardData(String boardId) throws IOException, InterruptedException {
-        String query = """
-            {
-            boards(ids: %s) {
-                name
-                id
-                description
-                items_page  {
-                items {
-                    name
-                    column_values {
-                    column {
-                        title
-                    }
-                    id
-                    value
-                    text
-                    }
-                }
-                }
-            }
-            }
-        """.formatted(boardId);
+        String query = loadBoardQuery(boardId);
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(MONDAY_API_URL))
@@ -58,5 +41,25 @@ public class HttpMondayClient implements MondayClient {
             HttpResponse.BodyHandlers.ofString());
 
         return new JSONObject(response.body());
+    }
+
+    private String loadBoardQuery(String boardId) {
+        String filePath = "/" + boardId + ".txt";
+        StringBuilder content = new StringBuilder();
+
+        try (InputStream inputStream = getClass().getResourceAsStream(filePath)) {
+            assert inputStream != null;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    content.append(line).append("\n");
+                }
+
+                return content.toString();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load query for board " + boardId, e);
+        }
     }
 }
