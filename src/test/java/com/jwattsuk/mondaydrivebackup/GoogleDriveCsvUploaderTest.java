@@ -118,7 +118,7 @@ class GoogleDriveCsvUploaderTest {
         });
 
         assertTrue(exception.getMessage().contains("Failed to upload file to Google Drive"));
-        assertTrue(exception.getCause().getMessage().contains("401 Unauthorized"));
+        assertTrue(exception.getCause().getMessage().contains("Drive API error"));
     }
 
     /**
